@@ -2,10 +2,14 @@
 #include <device_launch_parameters.h>
 #include <vector>
 #include <iostream>
+#include <chrono>
 
 
 using std::vector;
-
+using std::chrono::high_resolution_clock;
+using std::chrono::duration_cast;
+using std::chrono::duration;
+using std::chrono::milliseconds;
 
 //Kernel - the code that is beign run on the GPU
 __global__ void vectorAdd1D(int *vectorA, int *vectorB, int *vectorOutput, int amountElements)
@@ -44,6 +48,7 @@ int main(void)
    int *gpuVectorB;
    int *gpuVectorC;
 
+   auto timer1 = high_resolution_clock::now();
    //Allocating GPU memory
    cudaMalloc(&gpuVectorA, vectorSize);
    cudaMalloc(&gpuVectorB, vectorSize);
@@ -54,14 +59,22 @@ int main(void)
    cudaMemcpy(gpuVectorB, vectorB.data(), vectorSize, cudaMemcpyHostToDevice);
 
    //calling the function
-   vectorAdd1D <<<NUM_BLOCKS, NUM_THREADS>>> (gpuVectorA, gpuVectorB, gpuVectorC, MAX_ELEMENTS);
+   vectorAdd1D <<<NUM_BLOCKS, NUM_THREADS >>> (gpuVectorA, gpuVectorB, gpuVectorC, MAX_ELEMENTS);
 
    //retrieveing data from GPU
    cudaMemcpy(vectorC.data(), gpuVectorC, vectorSize, cudaMemcpyDeviceToHost);
 
+   auto timer2 = high_resolution_clock::now();
+
+   auto ms_int = duration_cast<milliseconds>(timer2 - timer1);
+   duration<double, std::milli> ms_double = timer2 - timer1;
+
    cudaFree(gpuVectorA);
    cudaFree(gpuVectorB);
    cudaFree(gpuVectorC);
+
+   std::cout << ms_int.count() << "ms\n";
+   std::cout << ms_double.count() << "ms";
 
    std::cout << "end" << std::endl;
 
