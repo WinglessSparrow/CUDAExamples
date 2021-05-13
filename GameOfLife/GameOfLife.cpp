@@ -46,14 +46,35 @@ int main()
        {dead, dead, dead, dead, dead, dead},
     };*/
 
+    //CellState startingTemplate[X_DIMENSION_TEMPLATE][Y_DIMENSION_TEMPLATE] = {
+    // {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead,    dead, dead, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead,    dead, dead, dead, dead},
+    // {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead,  alive, alive, alive, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead},
+    // {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead}
+    //};
+
+
    CellState startingTemplate[X_DIMENSION_TEMPLATE][Y_DIMENSION_TEMPLATE] = {
    {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
    {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
    {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
-   {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead,    dead, dead, dead, dead},
-   {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
-   {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
-   {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
+   {dead, dead, dead, dead, dead, dead, dead, dead,   alive, dead, dead, dead, dead,    dead, dead, dead, dead},
+   {dead, dead, alive, dead, dead, dead, dead, alive, alive, alive, dead, dead, dead,   dead, alive, dead, dead},
+   {dead, dead, alive, dead, dead, dead, dead, alive, alive, alive, dead, dead, dead,   dead, alive, dead, dead},
+   {dead, dead, alive, dead, dead, dead, dead, alive, alive, alive, dead, dead, dead,   dead, alive, dead, dead},
    {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
    {dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead, dead},
    {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead, alive, alive, alive, dead, dead, dead, dead},
@@ -62,9 +83,10 @@ int main()
    {dead, dead, alive, dead, dead, dead, dead, alive, dead, alive, dead, dead, dead,   dead, alive, dead, dead},
    {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead,    dead, dead, dead, dead},
    {dead, dead, dead, dead, alive, alive, alive,dead, dead, dead,  alive, alive, alive, dead, dead, dead, dead},
-   {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead},
-   {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, dead, dead, dead}
+   {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, alive, alive, alive},
+   {dead, dead, dead, dead, dead, dead, dead, dead,   dead, dead, dead, dead, dead, dead, alive, alive, alive}
    };
+
    CellState oldBoard[X_DIMENSION][Y_DIMENSION] = { dead };
 
    //coppy template into board
@@ -89,7 +111,7 @@ int main()
          }
       }
       memcpy(oldBoard, newBoard, X_DIMENSION * Y_DIMENSION * sizeof(CellState));
-      sleep_for(milliseconds{ 500 });
+      sleep_for(milliseconds{ 5 });
       system("cls");
    }
 
