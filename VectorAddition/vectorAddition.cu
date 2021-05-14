@@ -59,7 +59,7 @@ int main(void)
    cudaMemcpy(gpuVectorB, vectorB.data(), vectorSize, cudaMemcpyHostToDevice);
 
    //calling the function
-   vectorAdd1D <<<NUM_BLOCKS, NUM_THREADS >>> (gpuVectorA, gpuVectorB, gpuVectorC, MAX_ELEMENTS);
+   vectorAdd1D << <NUM_BLOCKS, NUM_THREADS >> > (gpuVectorA, gpuVectorB, gpuVectorC, MAX_ELEMENTS);
 
    //retrieveing data from GPU
    cudaMemcpy(vectorC.data(), gpuVectorC, vectorSize, cudaMemcpyDeviceToHost);

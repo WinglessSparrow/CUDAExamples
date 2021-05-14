@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a1a5dfe4-9462-4816-9841-7a1af68e5530}</ProjectGuid>
-    <RootNamespace>GameOfLife</RootNamespace>
+    <ProjectGuid>{54d7f0e9-6ed7-462f-919d-94aef36cd68f}</ProjectGuid>
+    <RootNamespace>GameOfLifeDataParallel</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -54,6 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.3.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -140,7 +141,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="GameOfLife.cpp" />
+    <ClCompile Include="GameOfLifeDataParallel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AdditionalFunctionallity\AdditionalFunctionallity.vcxproj">
@@ -149,5 +150,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.3.targets" />
   </ImportGroup>
 </Project>

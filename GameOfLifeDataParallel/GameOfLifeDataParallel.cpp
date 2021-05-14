@@ -4,6 +4,9 @@
 #include "../AdditionalFunctionallity/Timer.cpp"
 #include <random>
 
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
+
 using std::cout;
 using std::endl;
 using std::this_thread::sleep_for;
