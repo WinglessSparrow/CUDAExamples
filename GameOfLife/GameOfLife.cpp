@@ -10,9 +10,9 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-#define X_DIMENSION 5000
-#define Y_DIMENSION 5000
-#define AMM_RUNS 1
+#define COLLUMNS 50
+#define ROWS 50
+#define AMM_RUNS 10000
 
 enum CellState
 {
@@ -21,14 +21,14 @@ enum CellState
 };
 
 CellState determineNextState(int numberAliveCellsArround, CellState state);
-int numberAliveAround(const CellState board[][Y_DIMENSION], int xSize, int ySize, int xCell, int yCell);
-void displayGame(const CellState board[][Y_DIMENSION], int xSize, int ySize);
+int numberAliveAround(const CellState board[][ROWS], int xSize, int ySize, int xCell, int yCell);
+void displayGame(const CellState board[][ROWS], int xSize, int ySize);
 
 int main()
 {
 
-   auto newBoard = new CellState[X_DIMENSION][Y_DIMENSION];
-   auto oldBoard = new CellState[X_DIMENSION][Y_DIMENSION];
+   auto newBoard = new CellState[COLLUMNS][ROWS];
+   auto oldBoard = new CellState[COLLUMNS][ROWS];
 
    int runnsDone = 0;
 
@@ -38,9 +38,9 @@ int main()
    std::random_device rd;
    std::mt19937 gen(rd());
    std::uniform_int_distribution<> dis(0, 1);
-   for (int i = 0; i < X_DIMENSION; i++)
+   for (int i = 0; i < COLLUMNS; i++)
    {
-      for (int j = 0; j < Y_DIMENSION; j++)
+      for (int j = 0; j < ROWS; j++)
       {
          oldBoard[i][j] = (CellState)dis(gen);
       }
@@ -50,22 +50,23 @@ int main()
    while (runnsDone < AMM_RUNS)
    {
 
-      //displayGame(oldBoard, X_DIMENSION, Y_DIMENSION);
+      displayGame(oldBoard, COLLUMNS, ROWS);
       timer.addTimeStart();
       //iterating through board and calculating next state
-      for (int k = 0; k < X_DIMENSION; k++)
+      for (int k = 0; k < COLLUMNS; k++)
       {
-         for (int j = 0; j < Y_DIMENSION; j++)
+         for (int j = 0; j < ROWS; j++)
          {
-            int aliveCellsAround = numberAliveAround(oldBoard, X_DIMENSION, Y_DIMENSION, k, j);
+            int aliveCellsAround = numberAliveAround(oldBoard, COLLUMNS, ROWS, k, j);
             newBoard[k][j] = determineNextState(aliveCellsAround, oldBoard[k][j]);
          }
       }
       timer.addTimeFinish();
       //coppy new state to old board
-      memcpy(oldBoard, newBoard, X_DIMENSION * Y_DIMENSION * sizeof(CellState));
+      memcpy(oldBoard, newBoard, COLLUMNS * ROWS * sizeof(CellState));
 
       //clear console
+      sleep_for(milliseconds(5));
       runnsDone++;
       system("cls");
    }
@@ -99,7 +100,7 @@ CellState determineNextState(int numberAliveCellsArround, CellState state)
    return outputState;
 }
 
-int numberAliveAround(const CellState board[][Y_DIMENSION], int xSize, int ySize, int xCell, int yCell)
+int numberAliveAround(const CellState board[][ROWS], int xSize, int ySize, int xCell, int yCell)
 {
    int outputNumber = 0;
    int x = 0, y = 0;
@@ -135,7 +136,7 @@ int numberAliveAround(const CellState board[][Y_DIMENSION], int xSize, int ySize
    return outputNumber;
 }
 
-void displayGame(const CellState board[][Y_DIMENSION], int xSize, int ySize)
+void displayGame(const CellState board[][ROWS], int xSize, int ySize)
 {
    for (int i = 0; i < xSize; i++)
    {

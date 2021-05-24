@@ -10,6 +10,8 @@ using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::milliseconds;
+using std::cout;
+using std::endl;
 
 //Kernel - the code that is beign run on the GPU
 __global__ void vectorAdd1D(int *vectorA, int *vectorB, int *vectorOutput, int amountElements)
@@ -27,7 +29,7 @@ __global__ void vectorAdd1D(int *vectorA, int *vectorB, int *vectorOutput, int a
 
 int main(void)
 {
-   constexpr int MAX_ELEMENTS = 1 << 16;
+   constexpr int MAX_ELEMENTS = 1 << 4;
    constexpr int NUM_THREADS = 1 << 10;
    constexpr int NUM_BLOCKS = (MAX_ELEMENTS + NUM_THREADS - 1) / NUM_THREADS;
 
@@ -43,35 +45,46 @@ int main(void)
    for (int i = 0; i < MAX_ELEMENTS; i++) { vectorA.push_back(rand() % 100); }
    for (int i = 0; i < MAX_ELEMENTS; i++) { vectorB.push_back(rand() % 100); }
 
+   for (int i = 0; i < MAX_ELEMENTS; i++)
+   {
+      cout << vectorA[i] << "+" << vectorB[i] << endl;
+   }
+
+
    //pointers for GPU memory
-   int *gpuVectorA;
-   int *gpuVectorB;
-   int *gpuVectorC;
+   int *d_VectorA;
+   int *d_VectorB;
+   int *d_VectorC;
 
    auto timer1 = high_resolution_clock::now();
    //Allocating GPU memory
-   cudaMalloc(&gpuVectorA, vectorSize);
-   cudaMalloc(&gpuVectorB, vectorSize);
-   cudaMalloc(&gpuVectorC, vectorSize);
+   cudaMalloc(&d_VectorA, vectorSize);
+   cudaMalloc(&d_VectorB, vectorSize);
+   cudaMalloc(&d_VectorC, vectorSize);
 
    //Transfering data to from CPU to GPU
-   cudaMemcpy(gpuVectorA, vectorA.data(), vectorSize, cudaMemcpyHostToDevice);
-   cudaMemcpy(gpuVectorB, vectorB.data(), vectorSize, cudaMemcpyHostToDevice);
+   cudaMemcpy(d_VectorA, vectorA.data(), vectorSize, cudaMemcpyHostToDevice);
+   cudaMemcpy(d_VectorB, vectorB.data(), vectorSize, cudaMemcpyHostToDevice);
 
    //calling the function
-   vectorAdd1D << <NUM_BLOCKS, NUM_THREADS >> > (gpuVectorA, gpuVectorB, gpuVectorC, MAX_ELEMENTS);
+   vectorAdd1D << <NUM_BLOCKS, NUM_THREADS >> > (d_VectorA, d_VectorB, d_VectorC, MAX_ELEMENTS);
 
    //retrieveing data from GPU
-   cudaMemcpy(vectorC.data(), gpuVectorC, vectorSize, cudaMemcpyDeviceToHost);
+   cudaMemcpy(vectorC.data(), d_VectorC, vectorSize, cudaMemcpyDeviceToHost);
 
    auto timer2 = high_resolution_clock::now();
 
    auto ms_int = duration_cast<milliseconds>(timer2 - timer1);
    duration<double, std::milli> ms_double = timer2 - timer1;
 
-   cudaFree(gpuVectorA);
-   cudaFree(gpuVectorB);
-   cudaFree(gpuVectorC);
+   cudaFree(d_VectorA);
+   cudaFree(d_VectorB);
+   cudaFree(d_VectorC);
+
+   for (int i = 0; i < MAX_ELEMENTS; i++)
+   {
+      cout << vectorA[i] << "+" << vectorB[i] << "=" << vectorC[i] << endl;
+   }
 
    std::cout << ms_int.count() << "ms\n";
    std::cout << ms_double.count() << "ms";
