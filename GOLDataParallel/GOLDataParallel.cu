@@ -16,33 +16,34 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-#define COLLUMNS 5
+#define COLUMNS 5
 #define ROWS 5
-#define AMM_RUNS 4
+#define AMM_RUNS 100
 #define ALIVE 1
-#define DEAD 1
+#define DEAD 0
 
 #define BLOCKSIZE_X 64
 #define BLOCKSIZE_Y 64
 
-#define MOD(x, xSize) ((x - 1) % xSize + xSize) % xSize
+void displayGame(int board[ROWS][COLUMNS], int xSize, int ySize);
 
-void displayGame(int board[COLLUMNS][ROWS], int xSize, int ySize);
-
-__global__ void  determineNextState(int *board, int *newBoard, int xSize, int ySize, size_t pitchOld, size_t pitchNew)
+__global__ void  determineNextState(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    //getting threads
    int x = (blockIdx.x * blockDim.x) + threadIdx.x;
    int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-   if (x < xSize && y < ySize)
+   size_t pitchOldAdjusted = pitchOld / sizeof(int);
+   size_t pitchNewAdjusted = pitchNew / sizeof(int);
+
+   if (x < rows && y < columns)
    {
-      printf("Old Board X: %d Y: %d, Is: %d\n", x, y, *((int *)((char *)(board + y * pitchOld)) + x));
-      printf("New Board X: %d Y: %d, Is: %d\n", x, y, *((int *)((char *)(newBoard + y * pitchNew)) + x));
-      //x * xSize + y + pitch is the way of mapping 2d array on 1d plane
-      int idxNew = x * xSize + y + pitchNew;
-      int idxOld = x * xSize + y + pitchOld;
+      int idxNew = y * pitchNewAdjusted + x;
+      int idxOld = y * pitchOldAdjusted + x;
+
       int state = board[idxOld];
+
+      //printf("New Board X: %d Y: %d, Is: %d\n", x, y, newBoard[idxNew]);
 
       int output = DEAD;
 
@@ -66,71 +67,68 @@ __global__ void  determineNextState(int *board, int *newBoard, int xSize, int yS
    }
 }
 
-__global__ void numberAliveAround(int *board, int *newBoard, int xSize, int ySize, size_t pitchOld, size_t pitchNew)
+__global__ void numberAliveAround(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    //calculating the thread we are on
-   int x = (blockIdx.x * blockDim.x) + threadIdx.x;
-   int y = (blockIdx.y * blockDim.y) + threadIdx.y;
+   int row = (blockIdx.x * blockDim.x) + threadIdx.x;
+   int column = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-   if (x < xSize && y < ySize)
+   //adjusting pitch, because it's the ammount of bytes and not integer array width
+   size_t pitchOldAdjusted = pitchOld / sizeof(int);
+   size_t pitchNewAdjusted = pitchNew / sizeof(int);
+
+   if (row < rows && column < columns)
    {
-      //printf("X: %d Y: %d, Is: %d\n", x, y, board[x * xSize + y + pitchOld]);
-      //printf("Old: X: %d Y: %d, Is: %d\n", x, y, *((int *)((char *)(board + y * pitchOld)) + x));
-      printf("Old: X: %d Y: %d, Is: %d\n", x, y, board[y * xSize + x]);
+      //printf("Old: X: %d Y: %d, Is: %d\n", row, column, board[column * pitchOldAdjusted + row]);
 
       int outputNumber = 0;
       int idx = 0, xMod = 0, yMod = 0;
 
-      //represents a MOD operator, because % operator ist not quite the same
-      //((tidX - 1) % xSize + xSize) % xSize;
-      //navigatin in the 1d projection
-      //x * xSize + y + pitch
+      //over
+      yMod = (column - 1 + columns) % columns;
+      idx = yMod * pitchOldAdjusted + row;
+      outputNumber += board[idx];
+
+      //under
+      yMod = (column + 1) % columns;
+      idx = yMod * pitchOldAdjusted + row;
+      outputNumber += board[idx];
 
       //right
-      xMod = (x + 1) % xSize;
-      idx = xMod * xSize + y + pitchOld;
+      xMod = (row + 1) % rows;
+      idx = column * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
       //left
-      xMod = ((x - 1) % xSize + xSize) % xSize;
-      idx = xMod * xSize + y + pitchOld;
+      xMod = ((row - 1) + rows) % rows;
+      idx = column * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
-      //down
-      yMod = ((y + 1) % ySize + ySize) % ySize;
-      idx = x * xSize + yMod + pitchOld;
+      //right bottom corner
+      xMod = (row + 1) % rows;
+      yMod = (column + 1) % columns;
+      idx = yMod * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
-      //over
-      yMod = ((y - 1) % ySize + ySize) % ySize;
-      idx = x * xSize + yMod + pitchOld;
-      outputNumber += board[idx];
-
-      //right down corner
-      xMod = ((x + 1) % xSize + xSize) % xSize;
-      yMod = ((y + 1) % ySize + ySize) % ySize;
-      idx = xMod * xSize + yMod + pitchOld;
-      outputNumber += board[idx];
-
-      //left down corner
-      xMod = ((x - 1) % xSize + xSize) % xSize;
-      yMod = ((y + 1) % ySize + ySize) % ySize;
-      idx = xMod * xSize + yMod + pitchOld;
+      //left bottom corner
+      xMod = (row - 1 + rows) % rows;
+      yMod = (column + 1) % columns;
+      idx = yMod * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
       //right upper corner
-      xMod = ((x + 1) % xSize + xSize) % xSize;
-      yMod = ((y - 1) % ySize + ySize) % ySize;
-      idx = xMod * xSize + yMod + pitchOld;
+      xMod = (row + 1) % rows;
+      yMod = (column - 1 + columns) % columns;
+      idx = yMod * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
       //left upper corner
-      xMod = ((x - 1) % xSize + xSize) % xSize;
-      yMod = ((y - 1) % ySize + ySize) % ySize;
-      idx = xMod * xSize + yMod + pitchOld;
+      xMod = (row - 1 + rows) % rows;
+      yMod = (column - 1 + columns) % columns;
+      idx = yMod * pitchOldAdjusted + xMod;
       outputNumber += board[idx];
 
-      newBoard[x * xSize + y + pitchNew] = outputNumber;
+      newBoard[column * pitchNewAdjusted + row] = outputNumber;
    }
 }
 
@@ -139,7 +137,7 @@ int divideAndRound(int numberElements, int blockSize)
    return ((numberElements % blockSize) != 0) ? (numberElements / blockSize + 1) : (numberElements / blockSize);
 }
 
-void SendToCUDA(int oldBoard[COLLUMNS][ROWS], int newBoard[COLLUMNS][ROWS])
+void SendToCUDA(int oldBoard[ROWS][COLUMNS], int newBoard[ROWS][COLUMNS])
 {
    //CUDA pointers
    int *d_oldBoard;
@@ -148,22 +146,25 @@ void SendToCUDA(int oldBoard[COLLUMNS][ROWS], int newBoard[COLLUMNS][ROWS])
    size_t pitchOld;
    size_t pitchNew;
 
-   cudaMallocPitch(&d_oldBoard, &pitchOld, COLLUMNS * sizeof(int), ROWS);
-   cudaMallocPitch(&d_newBoard, &pitchNew, COLLUMNS * sizeof(int), ROWS);
+   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)COLUMNS * sizeof(int), (size_t)ROWS);
+   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)COLUMNS * sizeof(int), (size_t)ROWS);
 
-   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, COLLUMNS * sizeof(int), COLLUMNS * sizeof(int), ROWS, cudaMemcpyHostToDevice);
+   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, COLUMNS * sizeof(int), COLUMNS * sizeof(int), ROWS, cudaMemcpyHostToDevice);
 
-   dim3 grid(divideAndRound(COLLUMNS, BLOCKSIZE_X), divideAndRound(ROWS, BLOCKSIZE_Y));
+   dim3 grid(divideAndRound(ROWS, BLOCKSIZE_X), divideAndRound(COLUMNS, BLOCKSIZE_Y));
    dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
 
-   printf("counting \n");
-   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, COLLUMNS, ROWS, pitchOld, pitchNew);
+   //printf("counting \n");
+   //need to pitch / sizeof(int), because pitch is the ammount of bytes, and I need to navigate an int array
+   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, ROWS, COLUMNS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
-   printf("determining \n");
-   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLLUMNS, ROWS, pitchOld, pitchNew);
+   //printf("determining \n");
+   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, ROWS, COLUMNS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
 
-   cudaMemcpy2D(newBoard, COLLUMNS * sizeof(int), d_newBoard, pitchNew, COLLUMNS * sizeof(int), ROWS, cudaMemcpyDeviceToHost);
+   cudaMemcpy2D(newBoard, COLUMNS * sizeof(int), d_newBoard, pitchNew, COLUMNS * sizeof(int), ROWS, cudaMemcpyDeviceToHost);
 
    cudaFree(d_oldBoard);
    cudaFree(d_newBoard);
@@ -193,7 +194,7 @@ int main()
    //auto newBoard = mallocFlatt2DArray(COLLUMNS, ROWS);
    //auto oldBoard = mallocFlatt2DArray(COLLUMNS, ROWS);
 
-   int oldBoard[COLLUMNS][ROWS] =
+   int oldBoard[ROWS][COLUMNS] =
    {
       {0, 0, 0, 0, 0},
       {0, 0, 1, 0, 0},
@@ -201,7 +202,7 @@ int main()
       {0, 0, 1, 0, 0},
       {0, 0, 0, 0, 0}
    };
-   int newBoard[COLLUMNS][ROWS] = { 0 };
+   int newBoard[ROWS][COLUMNS] = { 0 };
 
    int runnsDone = 0;
 
@@ -222,40 +223,41 @@ int main()
    //the main game loop
    while (runnsDone < AMM_RUNS)
    {
-      displayGame(oldBoard, COLLUMNS, ROWS);
+      system("cls");
+      displayGame(oldBoard, COLUMNS, ROWS);
       timer.addTimeStart();
 
       SendToCUDA(oldBoard, newBoard);
 
       timer.addTimeFinish();
       //coppy new state to old board
-      memcpy(oldBoard, newBoard, COLLUMNS * ROWS * sizeof(int));
+      memcpy(oldBoard, newBoard, COLUMNS * ROWS * sizeof(int));
 
       //clear console
-      //system("cls");
+      sleep_for(milliseconds(500));
 
       runnsDone++;
    }
 
-   displayGame(newBoard, COLLUMNS, ROWS);
+   displayGame(newBoard, COLUMNS, ROWS);
 
    cout << "average time per Run Millis: " << timer.calcTimes().count() << endl;
    cout << "average time per Run Nano: " << timer.calcTimesNano().count() << endl;
    cout << "end" << endl;
 }
 
-void displayGame(int board[COLLUMNS][ROWS], int xSize, int ySize)
+void displayGame(int board[ROWS][COLUMNS], int xSize, int ySize)
 {
    cout << endl;
    //cout << "========================================================================================================================" << endl;
 
-   for (int i = 0; i < xSize; i++)
+   for (int i = 0; i < ySize; i++)
    {
-      for (int k = 0; k < ySize; k++)
+      for (int k = 0; k < xSize; k++)
       {
-         cout << ((board[i][k]) ? " * " : " _ ");
+         cout << ((board[i][k]) ? " * " : "   ");
       }
-      cout << "|" << endl;
+      cout << endl;
    }
    cout << endl;
    //cout << "========================================================================================================================" << endl;
