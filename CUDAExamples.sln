@@ -13,6 +13,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GOLDataParallel", "GOLDataP
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Copy2DArrayCuda", "Copy2DArrayCuda\Copy2DArrayCuda.vcxproj", "{0EAC0CB7-A4EF-496E-85D3-16C615C2157F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GOLTaskParallel", "GOLTaskParallel\GOLTaskParallel.vcxproj", "{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -71,6 +73,14 @@ Global
 		{0EAC0CB7-A4EF-496E-85D3-16C615C2157F}.Release|x64.Build.0 = Release|x64
 		{0EAC0CB7-A4EF-496E-85D3-16C615C2157F}.Release|x86.ActiveCfg = Release|Win32
 		{0EAC0CB7-A4EF-496E-85D3-16C615C2157F}.Release|x86.Build.0 = Release|Win32
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Debug|x64.ActiveCfg = Debug|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Debug|x64.Build.0 = Debug|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Debug|x86.ActiveCfg = Debug|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Release|Any CPU.ActiveCfg = Release|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Release|x64.ActiveCfg = Release|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Release|x64.Build.0 = Release|x64
+		{88B6F2FD-DBBD-4AD3-84E5-C3000E4D893E}.Release|x86.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

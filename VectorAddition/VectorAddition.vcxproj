@@ -142,6 +142,11 @@
   <ItemGroup>
     <CudaCompile Include="vectorAddition.cu" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdditionalFunctionallity\AdditionalFunctionallity.vcxproj">
+      <Project>{bc3c8e8b-25bf-4eb3-b4bb-72ae3a2b633c}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.3.targets" />

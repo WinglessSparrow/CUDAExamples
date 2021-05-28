@@ -10,9 +10,9 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-#define COLUMNS 50
-#define ROWS 50
-#define AMM_RUNS 10000
+#define COLUMNS 300
+#define ROWS 300
+#define AMM_RUNS 100
 
 enum CellState
 {
@@ -50,7 +50,7 @@ int main()
    while (runnsDone < AMM_RUNS)
    {
 
-      displayGame(oldBoard, COLUMNS, ROWS);
+      //displayGame(oldBoard, COLUMNS, ROWS);
       timer.addTimeStart();
       //iterating through board and calculating next state
       for (int k = 0; k < COLUMNS; k++)

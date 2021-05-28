@@ -1,8 +1,4 @@
-﻿#include <cuda.h>
-#include <cuda_runtime.h>
-#include <device_launch_parameters.h>
-#include <device_functions.h>
-#include <cuda_runtime_api.h>
+﻿#include "kernels.cuh"
 
 #include <iostream>
 #include <chrono>
@@ -16,9 +12,10 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-#define COLUMNS 3000
-#define ROWS 3000
-#define AMM_RUNS 50
+
+#define COLUMNS 30
+#define ROWS 30
+#define AMM_RUNS 100
 #define ALIVE 1
 #define DEAD 0
 
@@ -68,70 +65,6 @@ __global__ void  determineNextState(int *board, int *newBoard, int rows, int col
       }
 
       newBoard[idxNew] = output;
-   }
-}
-
-__global__ void numberAliveAround(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
-{
-   //calculating the thread we are on
-   int row = (blockIdx.x * blockDim.x) + threadIdx.x;
-   int column = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-   //adjusting pitch, because it's the ammount of bytes and not integer array width
-   size_t pitchOldAdjusted = pitchOld / sizeof(int);
-   size_t pitchNewAdjusted = pitchNew / sizeof(int);
-
-   if (row < rows && column < columns)
-   {
-
-      int outputNumber = 0;
-      int idx = 0, xMod = 0, yMod = 0;
-
-      //over
-      yMod = (column - 1 + columns) % columns;
-      idx = yMod * pitchOldAdjusted + row;
-      outputNumber += board[idx];
-
-      //under
-      yMod = (column + 1) % columns;
-      idx = yMod * pitchOldAdjusted + row;
-      outputNumber += board[idx];
-
-      //right
-      xMod = (row + 1) % rows;
-      idx = column * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      //left
-      xMod = ((row - 1) + rows) % rows;
-      idx = column * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      //right bottom corner
-      xMod = (row + 1) % rows;
-      yMod = (column + 1) % columns;
-      idx = yMod * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      //left bottom corner
-      xMod = (row - 1 + rows) % rows;
-      yMod = (column + 1) % columns;
-      idx = yMod * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      //right upper corner
-      xMod = (row + 1) % rows;
-      yMod = (column - 1 + columns) % columns;
-      idx = yMod * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      //left upper corner
-      xMod = (row - 1 + rows) % rows;
-      yMod = (column - 1 + columns) % columns;
-      idx = yMod * pitchOldAdjusted + xMod;
-      outputNumber += board[idx];
-
-      newBoard[column * pitchNewAdjusted + row] = outputNumber;
    }
 }
 
@@ -245,8 +178,16 @@ void SendToCUDA(int *oldBoard, int *newBoard)
    dim3 grid(divideAndRound(ROWS, BLOCKSIZE_X), divideAndRound(COLUMNS, BLOCKSIZE_Y));
    dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
 
-   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkAbove << <block, grid, 0 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkUnder << <block, grid, 1 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkRight << <block, grid, 2 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkLeft << <block, grid, 3 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkLeftAbove << <block, grid, 4 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkLeftUnder << <block, grid, 5 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkRightAbove << <block, grid, 6 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   checkRightUnder << <block, grid, 7 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
+
    determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
 
