@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CudaCompile Include="kernel.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="GOLData">
+      <UniqueIdentifier>{930d1c98-3318-44ee-9487-23617bd0abd2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GOLTask">
+      <UniqueIdentifier>{718b6f19-aaf3-4be5-8c34-82258e531d1f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="MatrixMul">
+      <UniqueIdentifier>{f06e2877-25b4-4957-a5c6-fbc941fba433}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
