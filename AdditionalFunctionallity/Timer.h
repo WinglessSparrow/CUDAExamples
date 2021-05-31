@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TIMER_H
+#define TIMER_H
 
 #include <vector>
 #include <iostream>
@@ -16,8 +17,6 @@ using std::chrono::system_clock;
 class Timer
 {
 public:
-   Timer();
-   ~Timer();
 
    void addTimeStart();
    void addTimeFinish();
@@ -33,3 +32,5 @@ private:
 
    vector<timeMeasurement> _times;
 };
+
+#endif

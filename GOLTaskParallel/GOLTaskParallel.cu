@@ -12,7 +12,6 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-
 #define COLUMNS 30
 #define ROWS 30
 #define AMM_RUNS 100
@@ -69,9 +68,9 @@ __global__ void  determineNextState(int *board, int *newBoard, int rows, int col
 }
 
 int divideAndRound(int numberElements, int blockSize);
-void SendToCUDA(int *oldBoard, int *newBoard);
+void sendToCUDA(int *oldBoard, int *newBoard);
 void displayGame(int *board, int xSize, int ySize);
-void fillBoardRandom(int *board, int xSize, int ySize);
+void fillProjected2DArrayRandom(int *board, int xSize, int ySize);
 
 int main()
 {
@@ -84,7 +83,7 @@ int main()
 
    Timer timer;
 
-   fillBoardRandom(oldBoard, ROWS, COLUMNS);
+   fillProjected2DArrayRandom(oldBoard, ROWS, COLUMNS);
 
    cout << "Game of Life, Data Parralel on CUDA with " << ROWS << " ROWS and " << COLUMNS << " Columns" << endl;
 
@@ -101,7 +100,7 @@ int main()
       timer.addTimeStart();
 
       //SendToCUDA(oldBoard, newBoard);
-      SendToCUDA(oldBoard, newBoard);
+      sendToCUDA(oldBoard, newBoard);
 
       timer.addTimeFinish();
 
@@ -146,7 +145,7 @@ int divideAndRound(int numberElements, int blockSize)
    return ((numberElements % blockSize) != 0) ? (numberElements / blockSize + 1) : (numberElements / blockSize);
 }
 
-void fillBoardRandom(int *board, int xSize, int ySize)
+void fillProjected2DArrayRandom(int *board, int xSize, int ySize)
 {
    std::random_device rd;
    std::mt19937 gen(rd());
@@ -161,7 +160,7 @@ void fillBoardRandom(int *board, int xSize, int ySize)
    }
 }
 
-void SendToCUDA(int *oldBoard, int *newBoard)
+void sendToCUDA(int *oldBoard, int *newBoard)
 {
    //CUDA pointers
    int *d_oldBoard;

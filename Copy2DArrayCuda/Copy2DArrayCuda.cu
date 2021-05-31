@@ -7,8 +7,8 @@
 #define BLOCKSIZE_X 32
 #define BLOCKSIZE_Y 32
 
-#define COLUMNS 4
-#define ROWS 5
+#define columns 4
+#define rows 5
 
 using namespace std;
 
@@ -39,13 +39,13 @@ __global__ void addToEachValueInMatrix(int *d_matrix, int xDim, int yDim, size_t
 int main()
 {
    //2D array
-   int matrix[COLUMNS][ROWS];
+   int matrix[columns][rows];
 
    //fill with numbers
    int count = 0;
-   for (int i = 0; i < COLUMNS; i++)
+   for (int i = 0; i < columns; i++)
    {
-      for (int j = 0; j < ROWS; j++)
+      for (int j = 0; j < rows; j++)
       {
          count++;
          matrix[i][j] = count;
@@ -60,22 +60,22 @@ int main()
    //pitch = offset in 1d array, because cuda is not a big friend of 2 arrays
    size_t pitch; extern void CudaMain(void);
 
-   cudaMallocPitch((void **)&d_matrix, (size_t *)&pitch, (size_t)COLUMNS * sizeof(int), (size_t)ROWS);
-   cudaMemcpy2D(d_matrix, pitch, matrix, COLUMNS * sizeof(int), COLUMNS * sizeof(int), ROWS, cudaMemcpyHostToDevice);
+   cudaMallocPitch((void **)&d_matrix, (size_t *)&pitch, (size_t)columns * sizeof(int), (size_t)rows);
+   cudaMemcpy2D(d_matrix, pitch, matrix, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
 
-   dim3 grid(divideAndRound(COLUMNS, BLOCKSIZE_X), divideAndRound(ROWS, BLOCKSIZE_Y));
+   dim3 grid(divideAndRound(columns, BLOCKSIZE_X), divideAndRound(rows, BLOCKSIZE_Y));
    dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
 
-   addToEachValueInMatrix << <block, grid >> > (d_matrix, COLUMNS, ROWS, pitch / sizeof(int));
+   addToEachValueInMatrix << <block, grid >> > (d_matrix, columns, rows, pitch / sizeof(int));
 
    //cudaMemcpy2D(matrix, pitch, d_matrix, X * sizeof(int), X * sizeof(int), Y, cudaMemcpyDeviceToHost);
-   cudaMemcpy2D(matrix, COLUMNS * sizeof(int), d_matrix, pitch, COLUMNS * sizeof(int), ROWS, cudaMemcpyDeviceToHost);
+   cudaMemcpy2D(matrix, columns * sizeof(int), d_matrix, pitch, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
 
    cudaFree(d_matrix);
 
-   for (int i = 0; i < COLUMNS; i++)
+   for (int i = 0; i < columns; i++)
    {
-      for (int j = 0; j < ROWS; j++)
+      for (int j = 0; j < rows; j++)
       {
          printf("%u\n", matrix[i][j]);
       }

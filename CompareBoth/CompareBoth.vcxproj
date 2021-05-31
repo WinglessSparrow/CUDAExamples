@@ -10,6 +10,26 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AdditionalFunctionallity\AdditionalFunctionallity.vcxproj">
+      <Project>{bc3c8e8b-25bf-4eb3-b4bb-72ae3a2b633c}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="GOL.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DataParallelManager.cuh" />
+    <ClInclude Include="GOL.h" />
+    <ClInclude Include="KernelManager.cuh" />
+    <ClInclude Include="TaskParallelManager.cuh" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="DataParallelManager.cu" />
+    <ClCompile Include="KernelManager.cu" />
+    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="TaskParallelManager.cu" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{35171C44-484A-42E4-B659-FF51DB9921ED}</ProjectGuid>
     <RootNamespace>CompareBoth</RootNamespace>
@@ -76,9 +96,6 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 11.3.targets" />

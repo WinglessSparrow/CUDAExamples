@@ -4,8 +4,8 @@
 #include <iostream>
 #include <random>
 
-#define COLUMNS 3
-#define ROWS 3
+#define columns 3
+#define rows 3
 
 using namespace std;
 
@@ -36,57 +36,55 @@ void fillMatrixZero(int *matrix, int xSize, int ySize)
    }
 }
 
-int half(const int i)
+int half(const int i, int max)
 {
    if (!i) return 0;
-   int s = 1, v = i;
-   if (i < 0) s = -1, v = -i;
 
-   return (v >> 1) * s;
+   return (max / 2) == i;
 }
 
 int main()
 {
-   int *matrixA = new int[COLUMNS * ROWS];
-   int *matrixB = new int[COLUMNS * ROWS];
-   int *matrixC = new int[COLUMNS * ROWS];
+   int *matrixA = new int[columns * rows];
+   int *matrixB = new int[columns * rows];
+   int *matrixC = new int[columns * rows];
 
-   fillMatrixRandom(matrixA, ROWS, COLUMNS);
-   fillMatrixRandom(matrixB, ROWS, COLUMNS);
-   fillMatrixZero(matrixC, ROWS, COLUMNS);
+   fillMatrixRandom(matrixA, rows, columns);
+   fillMatrixRandom(matrixB, rows, columns);
+   fillMatrixZero(matrixC, rows, columns);
 
-   for (int i = 0; i < ROWS; i++)
+   for (int i = 0; i < rows; i++)
    {
-      for (int j = 0; j < COLUMNS; j++)
+      for (int j = 0; j < columns; j++)
       {
-         for (int k = 0; k < ROWS; k++)
+         for (int k = 0; k < rows; k++)
          {
-            matrixC[j * COLUMNS + i] += matrixA[k * COLUMNS + i] * matrixB[j * COLUMNS + k];
+            matrixC[j * columns + i] += matrixA[k * columns + i] * matrixB[j * columns + k];
          }
       }
    }
 
-   for (int i = 0; i < ROWS; i++)
+   for (int i = 0; i < rows; i++)
    {
-      for (int j = 0; j < COLUMNS; j++)
+      for (int j = 0; j < columns; j++)
       {
-         cout << matrixA[j * COLUMNS + i] << " ";
+         cout << matrixA[j * columns + i] << " ";
       }
 
-      if (half) cout << " + ";
-      else cout << "   ";
+      if (half(i, rows)) cout << " +\t";
+      else cout << " \t";
 
-      for (int j = 0; j < COLUMNS; j++)
+      for (int j = 0; j < columns; j++)
       {
-         cout << matrixB[j * COLUMNS + i] << " ";
+         cout << matrixB[j * columns + i] << " ";
       }
 
-      if (half) cout << " = ";
-      else cout << "   ";
+      if (half(i, rows)) cout << " =\t";
+      else cout << " \t";
 
-      for (int j = 0; j < COLUMNS; j++)
+      for (int j = 0; j < columns; j++)
       {
-         cout << matrixC[j * COLUMNS + i] << " ";
+         cout << matrixC[j * columns + i] << " ";
       }
 
       cout << endl;

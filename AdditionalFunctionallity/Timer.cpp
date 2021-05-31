@@ -1,13 +1,5 @@
 #include "Timer.h"
 
-Timer::Timer()
-{
-}
-
-Timer::~Timer()
-{
-}
-
 void Timer::addTimeStart()
 {
    timeMeasurement temp;
