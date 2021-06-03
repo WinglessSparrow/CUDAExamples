@@ -9,9 +9,7 @@
 #define DEAD 0
 #define ALIVE 1
 
-class KernelManager
-{
-public:
-   virtual void sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns) = 0;
-   int divideAndRound(int numberElements, int blockSize);
-};
+#define BLOCKSIZE_X 32
+#define BLOCKSIZE_Y 32
+
+int divideAndRound(int numberElements, int blockSize);

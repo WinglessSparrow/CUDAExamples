@@ -1,7 +1,7 @@
-﻿#include "GOL.h"
+﻿#include "GOL.cuh"
 
 
-Timer GameOfLife::ExecuteGOL(int rows, size_t columns, size_t numRuns, KernelManager *manager)
+Timer GameOfLife::ExecuteGOL(size_t rows, size_t columns, size_t numRuns, void sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns))
 {
    bool display = columns < 40 && rows < 40;
 
@@ -14,8 +14,7 @@ Timer GameOfLife::ExecuteGOL(int rows, size_t columns, size_t numRuns, KernelMan
 
    Timer timer;
 
-   ProjectedManipulator::fillProjected2DArrayRandom(oldBoard, rows, columns);
-
+   ProjectedManipulator::fillProjected2DArrayRandom(oldBoard, rows, columns, 0, 1);
    cout << "Start: Data Parralel Game of Life" << endl;
 
    //the main game loop
@@ -31,7 +30,7 @@ Timer GameOfLife::ExecuteGOL(int rows, size_t columns, size_t numRuns, KernelMan
       //main calculation
       timer.addTimeStart();
 
-      manager->sendToCuda(oldBoard, newBoard, rows, columns);
+      sendToCuda(oldBoard, newBoard, rows, columns);
 
       timer.addTimeFinish();
 

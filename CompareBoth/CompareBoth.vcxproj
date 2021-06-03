@@ -16,18 +16,21 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="GOL.cpp" />
+    <CudaCompile Include="GOL.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DataParallelManager.cuh" />
-    <ClInclude Include="GOL.h" />
+    <ClInclude Include="DriverCode.h" />
+    <ClInclude Include="GOL.cuh" />
     <ClInclude Include="KernelManager.cuh" />
     <ClInclude Include="TaskParallelManager.cuh" />
+    <ClInclude Include="TestBase.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DataParallelManager.cu" />
+    <ClCompile Include="DriverCode.cpp" />
     <ClCompile Include="KernelManager.cu" />
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Source.cu" />
     <ClCompile Include="TaskParallelManager.cu" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

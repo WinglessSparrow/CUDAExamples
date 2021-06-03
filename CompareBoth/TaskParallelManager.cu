@@ -1,42 +1,6 @@
 #include "TaskParallelManager.cuh"
 
-void TaskParallelManager::sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns)
-{
-   //CUDA pointers
-   int *d_oldBoard;
-   int *d_newBoard;
-
-   size_t pitchOld;
-   size_t pitchNew;
-
-   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)columns * sizeof(int), (size_t)rows);
-   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)columns * sizeof(int), (size_t)rows);
-
-   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
-
-   dim3 grid(divideAndRound(rows, BLOCKSIZE_X), divideAndRound(columns, BLOCKSIZE_Y));
-   dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
-
-   checkAbove << <block, grid, 0 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkUnder << <block, grid, 1 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkRight << <block, grid, 2 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkLeft << <block, grid, 3 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkLeftAbove << <block, grid, 4 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkLeftUnder << <block, grid, 5 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkRightAbove << <block, grid, 6 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   checkRightUnder << <block, grid, 7 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   cudaDeviceSynchronize();
-
-   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
-   cudaDeviceSynchronize();
-
-   cudaMemcpy2D(newBoard, columns * sizeof(int), d_newBoard, pitchNew, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
-
-   cudaFree(d_oldBoard);
-   cudaFree(d_newBoard);
-}
-
-__device__ void TaskParallelManager::prepareIndexexPitches(int *row, int *column, size_t *pitchOld, size_t *pitchNew)
+__device__ void prepareIndexexPitches(int *row, int *column, size_t *pitchOld, size_t *pitchNew)
 {
    *row = (blockIdx.x * blockDim.x) + threadIdx.x;
    *column = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -45,7 +9,7 @@ __device__ void TaskParallelManager::prepareIndexexPitches(int *row, int *column
    *pitchNew = *pitchNew / sizeof(int);
 }
 
-__global__ void TaskParallelManager::checkAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -57,7 +21,7 @@ __global__ void TaskParallelManager::checkAbove(int *board, int *newBoard, int r
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -69,7 +33,7 @@ __global__ void TaskParallelManager::checkUnder(int *board, int *newBoard, int r
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkRight(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkRight(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -81,7 +45,7 @@ __global__ void TaskParallelManager::checkRight(int *board, int *newBoard, int r
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkLeft(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkLeft(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -93,7 +57,7 @@ __global__ void TaskParallelManager::checkLeft(int *board, int *newBoard, int ro
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkRightUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkRightUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -105,7 +69,7 @@ __global__ void TaskParallelManager::checkRightUnder(int *board, int *newBoard, 
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkLeftUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkLeftUnder(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -117,7 +81,7 @@ __global__ void TaskParallelManager::checkLeftUnder(int *board, int *newBoard, i
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkRightAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkRightAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -129,7 +93,7 @@ __global__ void TaskParallelManager::checkRightAbove(int *board, int *newBoard, 
       newBoard[column * pitchNew + row] += board[idx];
    }
 }
-__global__ void TaskParallelManager::checkLeftAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void checkLeftAbove(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    int row, column;
 
@@ -181,4 +145,41 @@ __global__ void  determineNextState(int *board, int *newBoard, int rows, int col
 
       newBoard[idxNew] = output;
    }
+}
+
+//void __host__ TaskParallelManager::sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns)
+__host__ void sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns)
+{
+   //CUDA pointers
+   int *d_oldBoard;
+   int *d_newBoard;
+
+   size_t pitchOld;
+   size_t pitchNew;
+
+   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)columns * sizeof(int), (size_t)rows);
+   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)columns * sizeof(int), (size_t)rows);
+
+   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
+
+   dim3 grid(divideAndRound(rows, BLOCKSIZE_X), divideAndRound(columns, BLOCKSIZE_Y));
+   dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
+
+   //checkAbove << <block, grid, 0 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkUnder << <block, grid, 1 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkRight << <block, grid, 2 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkLeft << <block, grid, 3 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkLeftAbove << <block, grid, 4 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkLeftUnder << <block, grid, 5 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkRightAbove << <block, grid, 6 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //checkRightUnder << <block, grid, 7 >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   //cudaDeviceSynchronize();
+
+   //determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
+   cudaDeviceSynchronize();
+
+   cudaMemcpy2D(newBoard, columns * sizeof(int), d_newBoard, pitchNew, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
+
+   cudaFree(d_oldBoard);
+   cudaFree(d_newBoard);
 }

@@ -1,36 +1,6 @@
 #include "DataParallelManager.cuh"
 
-void DataParallelManager::SendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns)
-{
-   //CUDA pointers
-   int *d_oldBoard;
-   int *d_newBoard;
-
-   size_t pitchOld;
-   size_t pitchNew;
-
-   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)columns * sizeof(int), (size_t)rows);
-   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)columns * sizeof(int), (size_t)rows);
-
-   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
-
-   dim3 grid(divideAndRound(rows, BLOCKSIZE_X), divideAndRound(columns, BLOCKSIZE_Y));
-   dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
-
-   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
-   cudaDeviceSynchronize();
-   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
-   cudaDeviceSynchronize();
-
-   cudaMemcpy2D(newBoard, columns * sizeof(int), d_newBoard, pitchNew, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
-
-   cudaFree(d_oldBoard);
-   cudaFree(d_newBoard);
-}
-
-
-
-__global__ void DataParallelManager::numberAliveAround(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void numberAliveAround(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    //calculating the thread we are on
    int row = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -94,7 +64,7 @@ __global__ void DataParallelManager::numberAliveAround(int *board, int *newBoard
    }
 }
 
-__global__ void  DataParallelManager::determineNextState(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
+__global__ void  determineNextState(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
    //getting coordintates of the thread
    int x = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -132,4 +102,32 @@ __global__ void  DataParallelManager::determineNextState(int *board, int *newBoa
 
       newBoard[idxNew] = output;
    }
+}
+
+void sendToCuda(int *oldBoard, int *newBoard, size_t rows, size_t columns)
+{
+   //CUDA pointers
+   int *d_oldBoard;
+   int *d_newBoard;
+
+   size_t pitchOld;
+   size_t pitchNew;
+
+   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)columns * sizeof(int), (size_t)rows);
+   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)columns * sizeof(int), (size_t)rows);
+
+   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
+
+   dim3 grid(divideAndRound(rows, BLOCKSIZE_X), divideAndRound(columns, BLOCKSIZE_Y));
+   dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
+
+//   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
+   cudaDeviceSynchronize();
+//   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
+   cudaDeviceSynchronize();
+
+   cudaMemcpy2D(newBoard, columns * sizeof(int), d_newBoard, pitchNew, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
+
+   cudaFree(d_oldBoard);
+   cudaFree(d_newBoard);
 }

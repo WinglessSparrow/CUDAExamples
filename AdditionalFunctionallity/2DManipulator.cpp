@@ -16,11 +16,11 @@ void ProjectedManipulator::displayGame(int *board, size_t xSize, size_t ySize)
    cout << endl;
 }
 
-void ProjectedManipulator::fillProjected2DArrayRandom(int *board, size_t xSize, size_t ySize)
+void ProjectedManipulator::fillProjected2DArrayRandom(int *board, size_t xSize, size_t ySize, int from, int to)
 {
    std::random_device rd;
    std::mt19937 gen(rd());
-   std::uniform_int_distribution<> dis(0, 1);
+   std::uniform_int_distribution<> dis(from, to);
 
    for (int i = 0; i < xSize; i++)
    {

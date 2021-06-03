@@ -1,29 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="GOLTask">
-      <UniqueIdentifier>{718b6f19-aaf3-4be5-8c34-82258e531d1f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="MatrixMul">
-      <UniqueIdentifier>{f06e2877-25b4-4957-a5c6-fbc941fba433}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="noCUDA">
-      <UniqueIdentifier>{c532d4c6-69a5-493a-84e6-a65fa896189f}</UniqueIdentifier>
-    </Filter>
     <Filter Include="GOL_CUDA">
       <UniqueIdentifier>{930d1c98-3318-44ee-9487-23617bd0abd2}</UniqueIdentifier>
     </Filter>
     <Filter Include="GOL_CUDA\Kernels">
       <UniqueIdentifier>{335de9cc-5562-4986-976a-7cad7c8c5bfa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="TestCode">
+      <UniqueIdentifier>{99f7a85a-9486-4b2a-af12-527500bd18d3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="GOL.cpp">
+    <CudaCompile Include="GOL.cu">
       <Filter>GOL_CUDA</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GOL.h">
+    <ClInclude Include="GOL.cuh">
       <Filter>GOL_CUDA</Filter>
     </ClInclude>
     <ClInclude Include="KernelManager.cuh">
@@ -34,6 +28,10 @@
     </ClInclude>
     <ClInclude Include="TaskParallelManager.cuh">
       <Filter>GOL_CUDA\Kernels</Filter>
+    </ClInclude>
+    <ClInclude Include="DriverCode.h" />
+    <ClInclude Include="TestBase.h">
+      <Filter>TestCode</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -46,6 +44,7 @@
     <ClCompile Include="TaskParallelManager.cu">
       <Filter>GOL_CUDA\Kernels</Filter>
     </ClCompile>
-    <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Source.cu" />
+    <ClCompile Include="DriverCode.cpp" />
   </ItemGroup>
 </Project>

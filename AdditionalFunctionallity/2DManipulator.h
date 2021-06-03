@@ -8,7 +8,7 @@ class ProjectedManipulator
 {
 public:
    static void displayGame(int *board, size_t xSize, size_t ySize);
-   static void fillProjected2DArrayRandom(int *board, size_t xSize, size_t ySize);
+   static void fillProjected2DArrayRandom(int *board, size_t xSize, size_t ySize, int from, int to);
 private:
 
 };
