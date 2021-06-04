@@ -5,9 +5,9 @@
 
 using namespace std;
 
-#define ROWS 30
-#define COLS 30
-#define NUM_RUNS 100
+#define ROWS 20
+#define COLS 20
+#define NUM_RUNS 1
 
 void printTimers(vector<Timer> timers)
 {
@@ -19,26 +19,31 @@ void printTimers(vector<Timer> timers)
 
 __global__ void blankKernel()
 {
-
 }
 
 int main()
 {
    Driver driver;
    vector<Timer> timers;
+   vector<TestBase *> tests;
 
-   //blank kernel, because first one always strats slower than the rest
+
+   tests.push_back(new DataParallel);
+   tests.push_back(new DataParallelNoOverlap());
+   tests.push_back(new TaskParallel());
+
+   //blank kernel, because first one always starts slower than the rest
    blankKernel << <1, 1 >> > ();
    cudaDeviceSynchronize();
 
    cout << "Starting testing with " << ROWS * COLS << " elements" << endl;
 
-   cout << "Test 1" << endl;
-   timers.push_back(driver.runTest(ROWS, COLS, NUM_RUNS, new TaskParallel()));
-   cout << "Test 2" << endl;
-   //timers.push_back(driver.runTest(ROWS, COLS, NUM_RUNS, new DataParallelNoOverlap()));
-   cout << "Test 3" << endl;
-   //timers.push_back(driver.runTest(ROWS, COLS, NUM_RUNS, new DataParallel()));
+   for each (auto t in tests)
+   {
+      cout << "Test of: " << t->getName() << endl;
+      timers.push_back(driver.runTest(ROWS, COLS, NUM_RUNS, t));
+   }
+
 
    printTimers(timers);
 

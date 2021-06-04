@@ -57,7 +57,7 @@ void DataParallelNoOverlap::executeCalculation(int *matrixA, int *matrixB, int *
 
 string DataParallelNoOverlap::getName()
 {
-    return string("Data Parallel without Overlap");
+   return string("Data Parallel without Overlap");
 }
 
 int DataParallelNoOverlap::divideAndRound(int numberElements, int blockSize)
