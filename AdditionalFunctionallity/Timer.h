@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <chrono>
+#include <string>
 
 using std::vector;
 using std::chrono::high_resolution_clock;
@@ -22,8 +23,12 @@ public:
    void addTimeFinish();
    milliseconds calcTimes();
    nanoseconds calcTimesNano();
+   void setName(const std::string name);
+   std::string getName();
 
 private:
+   std::string name;
+
    struct timeMeasurement
    {
       time_point<system_clock> start;

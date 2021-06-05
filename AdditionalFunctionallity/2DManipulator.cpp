@@ -3,16 +3,20 @@ using namespace std;
 
 void ProjectedManipulator::displayGame(int *board, size_t xSize, size_t ySize)
 {
+   for (int i = 0; i < xSize * 3; i++)cout << "=";
    cout << endl;
 
    for (int i = 0; i < ySize; i++)
    {
+      cout << "|";
       for (int k = 0; k < xSize; k++)
       {
          cout << ((board[i * ySize + k]) ? " * " : "   ");
       }
-      cout << endl;
+      cout << "|" << endl;
    }
+
+   for (int i = 0; i < xSize * 3; i++)cout << "=";
    cout << endl;
 }
 
@@ -30,3 +34,40 @@ void ProjectedManipulator::fillProjected2DArrayRandom(int *board, size_t xSize, 
       }
    }
 }
+
+int ProjectedManipulator::half(const int i, int max)
+{
+   if (!i) return 0;
+
+   return (max / 2) == i;
+}
+
+void ProjectedManipulator::displayMatricess(int rows, int columns, int *matrixA, int *matrixB, int *matrixC)
+{
+   for (int i = 0; i < rows; i++)
+   {
+      for (int j = 0; j < columns; j++)
+      {
+         cout << matrixA[j * columns + i] << " ";
+      }
+
+      if (half(i, rows)) cout << " *\t";
+      else cout << " \t";
+
+      for (int j = 0; j < columns; j++)
+      {
+         cout << matrixB[j * columns + i] << " ";
+      }
+
+      if (half(i, rows)) cout << " =\t";
+      else cout << " \t";
+
+      for (int j = 0; j < columns; j++)
+      {
+         cout << matrixC[j * columns + i] << " ";
+      }
+
+      cout << endl;
+   }
+}
+

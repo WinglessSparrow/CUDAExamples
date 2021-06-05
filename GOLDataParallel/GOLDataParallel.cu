@@ -16,8 +16,8 @@ using std::this_thread::sleep_for;
 using std::chrono::milliseconds;
 using std::copy;
 
-#define columns 3000
-#define rows 3000
+#define COLUMNS 3000
+#define ROWS 3000
 #define AMM_RUNS 50
 #define ALIVE 1
 #define DEAD 0
@@ -25,7 +25,7 @@ using std::copy;
 #define BLOCKSIZE_X 32
 #define BLOCKSIZE_Y 32
 
-#if columns < 40 && rows < 40
+#if COLUMNS < 40 && ROWS < 40
 #define DISPLAY true
 #else
 #define DISPLAY false
@@ -145,15 +145,15 @@ int main()
    int runnsDone = 0;
 
    //allocating memory
-   int *oldBoard = new int[rows * columns];
-   int *newBoard = new int[rows * columns];
+   int *oldBoard = new int[ROWS * COLUMNS];
+   int *newBoard = new int[ROWS * COLUMNS];
    *newBoard = { 0 };
 
    Timer timer;
 
-   fillProjected2DArrayRandom(oldBoard, rows, columns);
+   fillProjected2DArrayRandom(oldBoard, ROWS, COLUMNS);
 
-   cout << "Game of Life, Data Parralel on CUDA with " << rows << " ROWS and " << columns << " Columns" << endl;
+   cout << "Game of Life, Data Parralel on CUDA with " << ROWS << " ROWS and " << COLUMNS << " Columns" << endl;
 
    //the main game loop
    while (runnsDone < AMM_RUNS)
@@ -237,20 +237,20 @@ void sendToCUDA(int *oldBoard, int *newBoard)
    size_t pitchOld;
    size_t pitchNew;
 
-   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)columns * sizeof(int), (size_t)rows);
-   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)columns * sizeof(int), (size_t)rows);
+   cudaMallocPitch((void **)&d_oldBoard, (size_t *)&pitchOld, (size_t)COLUMNS * sizeof(int), (size_t)ROWS);
+   cudaMallocPitch((void **)&d_newBoard, (size_t *)&pitchNew, (size_t)COLUMNS* sizeof(int), (size_t)ROWS);
 
-   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, columns * sizeof(int), columns * sizeof(int), rows, cudaMemcpyHostToDevice);
+   cudaMemcpy2D(d_oldBoard, pitchOld, oldBoard, COLUMNS * sizeof(int), COLUMNS * sizeof(int), ROWS, cudaMemcpyHostToDevice);
 
-   dim3 grid(divideAndRound(rows, BLOCKSIZE_X), divideAndRound(columns, BLOCKSIZE_Y));
+   dim3 grid(divideAndRound(ROWS, BLOCKSIZE_X), divideAndRound(COLUMNS, BLOCKSIZE_Y));
    dim3 block(BLOCKSIZE_Y, BLOCKSIZE_X);
 
-   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
+   numberAliveAround << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
-   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, columns, rows, pitchOld, pitchNew);
+   determineNextState << <block, grid >> > (d_oldBoard, d_newBoard, COLUMNS, ROWS, pitchOld, pitchNew);
    cudaDeviceSynchronize();
 
-   cudaMemcpy2D(newBoard, columns * sizeof(int), d_newBoard, pitchNew, columns * sizeof(int), rows, cudaMemcpyDeviceToHost);
+   cudaMemcpy2D(newBoard, COLUMNS * sizeof(int), d_newBoard, pitchNew, COLUMNS * sizeof(int), ROWS, cudaMemcpyDeviceToHost);
 
    cudaFree(d_oldBoard);
    cudaFree(d_newBoard);

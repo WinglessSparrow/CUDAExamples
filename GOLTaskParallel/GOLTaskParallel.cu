@@ -1,4 +1,11 @@
-﻿#include "kernels.cuh"
+﻿/*
+* This code is hot garbage,
+* please do not use it as an example for Task parallelism
+* PerformanceTests project has the actual example for it
+* thanks
+*/
+
+#include "kernels.cuh"
 
 #include <iostream>
 #include <chrono>
@@ -29,7 +36,7 @@ using std::copy;
 
 __global__ void  determineNextState(int *board, int *newBoard, int rows, int columns, size_t pitchOld, size_t pitchNew)
 {
-   //getting coordintates of the thread
+   //getting coordinates of the thread
    int x = (blockIdx.x * blockDim.x) + threadIdx.x;
    int y = (blockIdx.y * blockDim.y) + threadIdx.y;
 

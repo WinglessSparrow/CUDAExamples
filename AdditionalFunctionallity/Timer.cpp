@@ -39,3 +39,13 @@ nanoseconds Timer::calcTimesNano()
    return timeInNano;
 }
 
+void Timer::setName(const std::string name)
+{
+   this->name = name;
+}
+
+std::string Timer::getName()
+{
+   return name;
+}
+
