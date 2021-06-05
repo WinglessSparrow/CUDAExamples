@@ -8,7 +8,6 @@ using namespace std;
 Timer Driver::runTest(size_t rows, size_t cols, int numRuns, TestBase *test)
 {
    bool display = cols < 30 && rows < 30;
-   display = false;
 
    int runnsDone = 0;
 
@@ -24,14 +23,14 @@ Timer Driver::runTest(size_t rows, size_t cols, int numRuns, TestBase *test)
    Timer timer;
 
    ProjectedManipulator::fillProjected2DArrayRandom(oldBoard, rows, cols, 0, 1);
+   ProjectedManipulator::fillProjected2DArrayRandom(matrixA, rows, cols, 0, 30);
+   ProjectedManipulator::fillProjected2DArrayRandom(matrixB, rows, cols, 0, 30);
+   ProjectedManipulator::fillProjected2DArrayRandom(matrixC, rows, cols, 0, 0);
 
    //the main testing loop
    while (runnsDone < numRuns)
    {
       //randomize matrix for each run
-      ProjectedManipulator::fillProjected2DArrayRandom(matrixA, rows, cols, 0, 30);
-      ProjectedManipulator::fillProjected2DArrayRandom(matrixB, rows, cols, 0, 30);
-      ProjectedManipulator::fillProjected2DArrayRandom(matrixC, rows, cols, 0, 0);
 
       if (display)
       {

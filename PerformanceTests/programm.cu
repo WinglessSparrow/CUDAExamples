@@ -5,9 +5,10 @@
 
 using namespace std;
 
-#define ROWS 20
-#define COLS 20
-#define NUM_RUNS 1
+
+//tweking variables
+#define NUM_ELEMENTS 4000
+#define NUM_RUNS 300
 
 void printTimers(vector<Timer> timers)
 {
@@ -36,12 +37,12 @@ int main()
    blankKernel << <1, 1 >> > ();
    cudaDeviceSynchronize();
 
-   cout << "Starting testing with " << ROWS * COLS << " elements" << endl;
+   cout << "Starting testing with " << NUM_ELEMENTS << " elements" << endl;
 
    for each (auto t in tests)
    {
       cout << "Test of: " << t->getName() << endl;
-      timers.push_back(driver.runTest(ROWS, COLS, NUM_RUNS, t));
+      timers.push_back(driver.runTest(NUM_ELEMENTS / 2, NUM_ELEMENTS / 2, NUM_RUNS, t));
    }
 
 

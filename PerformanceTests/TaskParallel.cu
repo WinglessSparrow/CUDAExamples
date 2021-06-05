@@ -11,9 +11,8 @@ void TaskParallel::executeCalculation(int *matrixA, int *matrixB, int *matrixC, 
    dim3 grid(2, 2);
    dim3 block(16, 16);
 
-   const int streamWidth = grid.x * grid.y * block.x * block.y;
+   int streamWidth = grid.x * grid.y * block.x * block.y;
    const int numKernelCalls = (dataSize / streamWidth < 1) ? 1 : (dataSize / streamWidth + 1);
-
 
    //creating streams
    cudaStream_t *streams = new cudaStream_t[numKernelCalls * 2];
@@ -43,6 +42,7 @@ void TaskParallel::executeCalculation(int *matrixA, int *matrixB, int *matrixC, 
    cudaMallocPitch((void **)&d_matrixB, (size_t *)&matrixPitches.pitchMB, (size_t)cols * sizeof(int), (size_t)rows);
    cudaMallocPitch((void **)&d_matrixC, (size_t *)&matrixPitches.pitchMC, (size_t)cols * sizeof(int), (size_t)rows);
 
+
    cudaMemcpy2D(d_oldBoard, boardPitches.pitchOld, oldBoard, cols * sizeof(int), cols * sizeof(int), rows, cudaMemcpyHostToDevice);
    cudaMemcpy2D(d_matrixA, matrixPitches.pitchMA, matrixA, cols * sizeof(int), cols * sizeof(int), rows, cudaMemcpyHostToDevice);
    cudaMemcpy2D(d_matrixB, matrixPitches.pitchMB, matrixB, cols * sizeof(int), cols * sizeof(int), rows, cudaMemcpyHostToDevice);
@@ -54,7 +54,6 @@ void TaskParallel::executeCalculation(int *matrixA, int *matrixB, int *matrixC, 
       numberAliveAroundOffset << <block, grid, 0, streams[0] >> > (d_oldBoard, d_newBoard, cols, rows, boardPitches, offset * streamWidth);
       determineNextStateOffset << <block, grid, 0, streams[0] >> > (d_oldBoard, d_newBoard, cols, rows, boardPitches, offset * streamWidth);
       multiplyMatrixOffset << <block, grid, 0, streams[1] >> > (d_matrixA, d_matrixB, d_matrixC, cols, rows, matrixPitches, offset * streamWidth);
-      offset++;
    }
 
    for (int i = 0; i < 2; i++)
@@ -62,6 +61,8 @@ void TaskParallel::executeCalculation(int *matrixA, int *matrixB, int *matrixC, 
       cudaStreamSynchronize(streams[i]);
       cudaStreamDestroy(streams[i]);
    }
+
+   cudaDeviceSynchronize();
 
    cudaMemcpy2D(newBoard, cols * sizeof(int), d_newBoard, boardPitches.pitchNew, cols * sizeof(int), rows, cudaMemcpyDeviceToHost);
    cudaMemcpy2D(matrixC, cols * sizeof(int), d_matrixC, matrixPitches.pitchMC, cols * sizeof(int), rows, cudaMemcpyDeviceToHost);

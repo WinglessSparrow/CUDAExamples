@@ -178,7 +178,6 @@ __global__ void numberAliveAroundOffset(int *board, int *newBoard, int rows, int
 
    if (row < rows && column < columns)
    {
-
       int outputNumber = 0;
       int idx = 0, xMod = 0, yMod = 0;
 
@@ -232,7 +231,7 @@ __global__ void numberAliveAroundOffset(int *board, int *newBoard, int rows, int
 
 __global__ void multiplyMatrixOffset(int *matrixA, int *matrixB, int *matrixC, int rows, int cols, pitchesMatrix pitches, int offset)
 {
-   int row = (blockIdx.x * blockDim.x) + threadIdx.x + offset;
+   int row = (blockIdx.x * blockDim.x) + threadIdx.x;
    int column = (blockIdx.y * blockDim.y) + threadIdx.y;
 
    //adjusting pitch, because it's the ammount of bytes and not integer array width
@@ -240,11 +239,11 @@ __global__ void multiplyMatrixOffset(int *matrixA, int *matrixB, int *matrixC, i
    size_t pitchBAdjusted = pitches.pitchMB / sizeof(int);
    size_t pitchCAdjusted = pitches.pitchMC / sizeof(int);
 
-   if (row < rows && column < cols)
+   if (column < cols && row < rows)
    {
       for (int i = 0; i < pitchAAdjusted; i++)
       {
-         matrixC[column * pitchCAdjusted + row] += matrixA[i * pitchAAdjusted + row] * matrixB[column * pitchBAdjusted + i];
+         matrixC[column * pitchCAdjusted + row + offset] += matrixA[i * pitchAAdjusted + row + offset] * matrixB[column * pitchBAdjusted + i + offset];
       }
    }
 }
